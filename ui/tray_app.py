@@ -5,15 +5,15 @@ from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu,
                               QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QListWidget, QListWidgetItem,
                               QSlider, QGroupBox, QFileDialog)
-
+ 
 STYLE = "QDialog{background:#1e1e2e;color:#cdd6f4;}QLabel{color:#cdd6f4;}QGroupBox{color:#89b4fa;border:1px solid #313244;border-radius:6px;margin-top:8px;padding:6px;}QGroupBox::title{subcontrol-origin:margin;left:8px;}QListWidget{background:#181825;border:1px solid #313244;border-radius:4px;color:#cdd6f4;}QPushButton{background:#313244;color:#cdd6f4;border-radius:6px;padding:5px 12px;}QPushButton:hover{background:#45475a;}"
-
+ 
 def _make_icon(color="#89b4fa"):
     px = QPixmap(22,22); px.fill(Qt.GlobalColor.transparent)
     p = QPainter(px); p.setRenderHint(QPainter.RenderHint.Antialiasing)
     p.setBrush(QBrush(QColor(color))); p.setPen(Qt.PenStyle.NoPen)
     p.drawEllipse(2,2,18,18); p.end(); return QIcon(px)
-
+ 
 class TrayApp:
     def __init__(self, ctrl):
         self._ctrl = ctrl
@@ -26,13 +26,13 @@ class TrayApp:
         menu.addSeparator()
         menu.addAction("❌  Quit",         self._quit)
         self._tray.setContextMenu(menu)
-
+ 
     def show(self):   self._tray.show()
     def notify(self, title, msg): self._tray.showMessage(title, msg, QSystemTrayIcon.MessageIcon.Information, 3000)
     def _show_stats(self):    StatsDialog(self._ctrl).exec()
     def _show_settings(self): SettingsDialog(self._ctrl).exec()
     def _quit(self):  self._ctrl.shutdown(); QApplication.quit()
-
+ 
 class StatsDialog(QDialog):
     def __init__(self, ctrl):
         super().__init__(); self.setWindowTitle("Statistics")
@@ -49,7 +49,7 @@ class StatsDialog(QDialog):
         for f in clf.get_all_folders(): lst.addItem(QListWidgetItem(f"  📁  {f}"))
         g2l.addWidget(lst); lay.addWidget(g2)
         btn = QPushButton("Close"); btn.clicked.connect(self.accept); lay.addWidget(btn)
-
+ 
 class SettingsDialog(QDialog):
     def __init__(self, ctrl):
         super().__init__(); self.setWindowTitle("Settings")
@@ -64,12 +64,12 @@ class SettingsDialog(QDialog):
         rb = QPushButton("－ Remove"); rb.clicked.connect(self._remove)
         br.addWidget(ab); br.addWidget(rb); g1l.addLayout(br); lay.addWidget(g1)
         g2 = QGroupBox("Confidence Threshold"); g2l = QVBoxLayout(g2)
-        self._cl = QLabel(f"Current: {int(ctrl.threshold*100)}%")
-        sl = QSlider(Qt.Orientation.Horizontal); sl.setRange(40,90); sl.setValue(int(ctrl.threshold*100))
+        self._cl = QLabel(f"Current: {int(ctrl.auto_move_threshold*100)}%")
+        sl = QSlider(Qt.Orientation.Horizontal); sl.setRange(40,90); sl.setValue(int(ctrl.auto_move_threshold*100))
         sl.valueChanged.connect(lambda v: (self._cl.setText(f"Current: {v}%"), setattr(ctrl,'threshold',v/100)))
         g2l.addWidget(self._cl); g2l.addWidget(sl); lay.addWidget(g2)
         btn = QPushButton("Save & Close"); btn.clicked.connect(self.accept); lay.addWidget(btn)
-
+ 
     def _add(self):
         f = QFileDialog.getExistingDirectory(self,"Select folder to watch")
         if f: self._lst.addItem(f); self._ctrl.add_watch_directory(f)
